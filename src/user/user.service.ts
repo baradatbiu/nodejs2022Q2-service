@@ -13,36 +13,36 @@ import { ERRORS } from './../types/Error';
 export class UserService {
   private users: UserEntity[] = [];
 
-  create(createUserDto: CreateUserDto): UserEntity {
+  create(createUserDto: CreateUserDto): Promise<UserEntity> {
     const user = new UserEntity({
       id: v4(),
       ...createUserDto,
       version: 1,
-      createdAt: Date.now() / 1000,
-      updatedAt: Date.now() / 1000,
+      createdAt: Date.now(),
+      updatedAt: Date.now(),
     });
 
     this.users.push(user);
 
-    return user;
+    return Promise.resolve(user);
   }
 
-  findAll(): UserEntity[] {
-    return this.users;
+  findAll(): Promise<UserEntity[]> {
+    return Promise.resolve(this.users);
   }
 
-  findOne(id: string): UserEntity {
+  findOne(id: string): Promise<UserEntity> {
     const user = this.users.find(({ id: userId }) => userId === id);
 
     if (!user) throw new NotFoundException(ERRORS.NOT_FOUND);
 
-    return user;
+    return Promise.resolve(user);
   }
 
   update(
     id: string,
     { oldPassword, newPassword: password }: UpdateUserDto,
-  ): UserEntity {
+  ): Promise<UserEntity> {
     const user = this.users.find(({ id: userId }) => userId === id);
 
     if (!user) throw new NotFoundException(ERRORS.NOT_FOUND);
@@ -53,19 +53,19 @@ export class UserService {
     Object.assign(user, {
       password,
       version: ++user.version,
-      updatedAt: Date.now() / 1000,
+      updatedAt: Date.now(),
     });
 
-    return user;
+    return Promise.resolve(user);
   }
 
-  remove(id: string): UserEntity {
+  remove(id: string): Promise<UserEntity> {
     const user = this.users.find(({ id: userId }) => userId === id);
 
     if (!user) throw new NotFoundException(ERRORS.NOT_FOUND);
 
     this.users = this.users.filter(({ id: userId }) => userId !== id);
 
-    return user;
+    return Promise.resolve(user);
   }
 }

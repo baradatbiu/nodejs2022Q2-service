@@ -23,38 +23,42 @@ export class UserController {
   @UseInterceptors(ClassSerializerInterceptor)
   @Post()
   @HttpCode(201)
-  create(@Body() createUserDto: CreateUserDto): UserEntity {
-    return this.userService.create(createUserDto);
+  async create(@Body() createUserDto: CreateUserDto): Promise<UserEntity> {
+    return await this.userService.create(createUserDto);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Get()
   @HttpCode(200)
-  findAll(): UserEntity[] {
-    return this.userService.findAll();
+  async findAll(): Promise<UserEntity[]> {
+    return await this.userService.findAll();
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Get(':id')
   @HttpCode(200)
-  findOne(@Param('id', new ParseUUIDPipe()) id: string): UserEntity {
-    return this.userService.findOne(id);
+  async findOne(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<UserEntity> {
+    return await this.userService.findOne(id);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Put(':id')
   @HttpCode(200)
-  update(
-    @Param('id', new ParseUUIDPipe()) id: string,
+  async update(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
     @Body() updateUserDto: UpdateUserDto,
-  ): UserEntity {
-    return this.userService.update(id, updateUserDto);
+  ): Promise<UserEntity> {
+    return await this.userService.update(id, updateUserDto);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
   @Delete(':id')
   @HttpCode(204)
-  remove(@Param('id', new ParseUUIDPipe()) id: string): UserEntity {
-    return this.userService.remove(id);
+  async remove(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ): Promise<UserEntity> {
+    return await this.userService.remove(id);
   }
 }

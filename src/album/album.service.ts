@@ -1,26 +1,54 @@
-import { Injectable } from '@nestjs/common';
+import { ERRORS } from './../types/Error';
+import { v4 } from 'uuid';
+import { AlbumEntity } from './entities/album.entity';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 
 @Injectable()
 export class AlbumService {
-  create(createAlbumDto: CreateAlbumDto) {
-    return 'This action adds a new album';
+  private albums: AlbumEntity[] = [];
+
+  create(createAlbumDto: CreateAlbumDto): Promise<AlbumEntity> {
+    const album = new AlbumEntity({
+      id: v4(),
+      ...createAlbumDto,
+    });
+
+    this.albums.push(album);
+
+    return Promise.resolve(album);
   }
 
-  findAll() {
-    return `This action returns all album`;
+  findAll(): Promise<AlbumEntity[]> {
+    return Promise.resolve(this.albums);
   }
 
-  findOne(id: number) {
-    return `This action returns a #${id} album`;
+  findOne(id: string): Promise<AlbumEntity> {
+    const album = this.albums.find(({ id: albumId }) => albumId === id);
+
+    if (!album) throw new NotFoundException(ERRORS.NOT_FOUND);
+
+    return Promise.resolve(album);
   }
 
-  update(id: number, updateAlbumDto: UpdateAlbumDto) {
-    return `This action updates a #${id} album`;
+  update(id: string, updateAlbumDto: UpdateAlbumDto): Promise<AlbumEntity> {
+    const album = this.albums.find(({ id: albumId }) => albumId === id);
+
+    if (!album) throw new NotFoundException(ERRORS.NOT_FOUND);
+
+    Object.assign(album, updateAlbumDto);
+
+    return Promise.resolve(album);
   }
 
-  remove(id: number) {
-    return `This action removes a #${id} album`;
+  remove(id: string): Promise<AlbumEntity> {
+    const album = this.albums.find(({ id: albumId }) => albumId === id);
+
+    if (!album) throw new NotFoundException(ERRORS.NOT_FOUND);
+
+    this.albums = this.albums.filter(({ id: albumId }) => albumId !== id);
+
+    return Promise.resolve(album);
   }
 }
