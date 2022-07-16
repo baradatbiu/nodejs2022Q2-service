@@ -1,20 +1,29 @@
+import { FavouriteService } from './../favourite/favourite.service';
 import { TrackService } from './../track/track.service';
 import { AlbumService } from './../album/album.service';
 import { ERRORS } from './../types/Error';
 import { v4 } from 'uuid';
 import { ArtistEntity } from './entities/artist.entity';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  forwardRef,
+  Inject,
+} from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 
 @Injectable()
 export class ArtistService {
   constructor(
+    @Inject(forwardRef(() => AlbumService))
     private readonly albumService: AlbumService,
     private readonly trackService: TrackService,
+    @Inject(forwardRef(() => FavouriteService))
+    private readonly favouriteService: FavouriteService,
   ) {}
 
-  private artists: ArtistEntity[] = [];
+  private static artists: ArtistEntity[] = [];
 
   create(createArtistDto: CreateArtistDto): Promise<ArtistEntity> {
     const artist = new ArtistEntity({
@@ -22,17 +31,19 @@ export class ArtistService {
       ...createArtistDto,
     });
 
-    this.artists.push(artist);
+    ArtistService.artists.push(artist);
 
     return Promise.resolve(artist);
   }
 
   findAll(): Promise<ArtistEntity[]> {
-    return Promise.resolve(this.artists);
+    return Promise.resolve(ArtistService.artists);
   }
 
   findOne(id: string): Promise<ArtistEntity> {
-    const artist = this.artists.find(({ id: artistId }) => artistId === id);
+    const artist = ArtistService.artists.find(
+      ({ id: artistId }) => artistId === id,
+    );
 
     if (!artist) throw new NotFoundException(ERRORS.NOT_FOUND);
 
@@ -40,7 +51,9 @@ export class ArtistService {
   }
 
   update(id: string, updateArtistDto: UpdateArtistDto): Promise<ArtistEntity> {
-    const artist = this.artists.find(({ id: artistId }) => artistId === id);
+    const artist = ArtistService.artists.find(
+      ({ id: artistId }) => artistId === id,
+    );
 
     if (!artist) throw new NotFoundException(ERRORS.NOT_FOUND);
 
@@ -50,11 +63,15 @@ export class ArtistService {
   }
 
   async remove(id: string): Promise<ArtistEntity> {
-    const artist = this.artists.find(({ id: artistId }) => artistId === id);
+    const artist = ArtistService.artists.find(
+      ({ id: artistId }) => artistId === id,
+    );
 
     if (!artist) throw new NotFoundException(ERRORS.NOT_FOUND);
 
-    this.artists = this.artists.filter(({ id: artistId }) => artistId !== id);
+    ArtistService.artists = ArtistService.artists.filter(
+      ({ id: artistId }) => artistId !== id,
+    );
 
     const albums = await this.albumService.findAll();
     const tracks = await this.trackService.findAll();
@@ -69,6 +86,8 @@ export class ArtistService {
     if (foundTrack) {
       await this.trackService.update(foundTrack.id, { artistId: null });
     }
+
+    await this.favouriteService.remove({ id, type: 'artists' });
 
     return Promise.resolve(artist);
   }

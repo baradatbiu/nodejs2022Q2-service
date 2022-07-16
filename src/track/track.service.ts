@@ -1,13 +1,24 @@
+import { FavouriteService } from './../favourite/favourite.service';
 import { ERRORS } from './../types/Error';
 import { v4 } from 'uuid';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  forwardRef,
+  Inject,
+} from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { TrackEntity } from './entities/track.entity';
 
 @Injectable()
 export class TrackService {
-  private tracks: TrackEntity[] = [];
+  constructor(
+    @Inject(forwardRef(() => FavouriteService))
+    private readonly favouriteService: FavouriteService,
+  ) {}
+
+  private static tracks: TrackEntity[] = [];
 
   create(createTrackDto: CreateTrackDto): Promise<TrackEntity> {
     const track = new TrackEntity({
@@ -15,17 +26,17 @@ export class TrackService {
       ...createTrackDto,
     });
 
-    this.tracks.push(track);
+    TrackService.tracks.push(track);
 
     return Promise.resolve(track);
   }
 
   findAll(): Promise<TrackEntity[]> {
-    return Promise.resolve(this.tracks);
+    return Promise.resolve(TrackService.tracks);
   }
 
   findOne(id: string): Promise<TrackEntity> {
-    const track = this.tracks.find(({ id: trackId }) => trackId === id);
+    const track = TrackService.tracks.find(({ id: trackId }) => trackId === id);
 
     if (!track) throw new NotFoundException(ERRORS.NOT_FOUND);
 
@@ -33,7 +44,7 @@ export class TrackService {
   }
 
   update(id: string, updateTrackDto: UpdateTrackDto): Promise<TrackEntity> {
-    const track = this.tracks.find(({ id: trackId }) => trackId === id);
+    const track = TrackService.tracks.find(({ id: trackId }) => trackId === id);
 
     if (!track) throw new NotFoundException(ERRORS.NOT_FOUND);
 
@@ -42,12 +53,16 @@ export class TrackService {
     return Promise.resolve(track);
   }
 
-  remove(id: string): Promise<TrackEntity> {
-    const track = this.tracks.find(({ id: trackId }) => trackId === id);
+  async remove(id: string): Promise<TrackEntity> {
+    const track = TrackService.tracks.find(({ id: trackId }) => trackId === id);
 
     if (!track) throw new NotFoundException(ERRORS.NOT_FOUND);
 
-    this.tracks = this.tracks.filter(({ id: trackId }) => trackId !== id);
+    TrackService.tracks = TrackService.tracks.filter(
+      ({ id: trackId }) => trackId !== id,
+    );
+
+    await this.favouriteService.remove({ id, type: 'tracks' });
 
     return Promise.resolve(track);
   }

@@ -1,13 +1,26 @@
+import { FavouriteService } from './../favourite/favourite.service';
+import { TrackService } from './../track/track.service';
 import { ERRORS } from './../types/Error';
 import { v4 } from 'uuid';
 import { AlbumEntity } from './entities/album.entity';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  forwardRef,
+  Inject,
+} from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 
 @Injectable()
 export class AlbumService {
-  private albums: AlbumEntity[] = [];
+  constructor(
+    private readonly trackService: TrackService,
+    @Inject(forwardRef(() => FavouriteService))
+    private readonly favouriteService: FavouriteService,
+  ) {}
+
+  private static albums: AlbumEntity[] = [];
 
   create(createAlbumDto: CreateAlbumDto): Promise<AlbumEntity> {
     const album = new AlbumEntity({
@@ -15,17 +28,17 @@ export class AlbumService {
       ...createAlbumDto,
     });
 
-    this.albums.push(album);
+    AlbumService.albums.push(album);
 
     return Promise.resolve(album);
   }
 
   findAll(): Promise<AlbumEntity[]> {
-    return Promise.resolve(this.albums);
+    return Promise.resolve(AlbumService.albums);
   }
 
   findOne(id: string): Promise<AlbumEntity> {
-    const album = this.albums.find(({ id: albumId }) => albumId === id);
+    const album = AlbumService.albums.find(({ id: albumId }) => albumId === id);
 
     if (!album) throw new NotFoundException(ERRORS.NOT_FOUND);
 
@@ -33,7 +46,7 @@ export class AlbumService {
   }
 
   update(id: string, updateAlbumDto: UpdateAlbumDto): Promise<AlbumEntity> {
-    const album = this.albums.find(({ id: albumId }) => albumId === id);
+    const album = AlbumService.albums.find(({ id: albumId }) => albumId === id);
 
     if (!album) throw new NotFoundException(ERRORS.NOT_FOUND);
 
@@ -42,12 +55,24 @@ export class AlbumService {
     return Promise.resolve(album);
   }
 
-  remove(id: string): Promise<AlbumEntity> {
-    const album = this.albums.find(({ id: albumId }) => albumId === id);
+  async remove(id: string): Promise<AlbumEntity> {
+    const album = AlbumService.albums.find(({ id: albumId }) => albumId === id);
 
     if (!album) throw new NotFoundException(ERRORS.NOT_FOUND);
 
-    this.albums = this.albums.filter(({ id: albumId }) => albumId !== id);
+    AlbumService.albums = AlbumService.albums.filter(
+      ({ id: albumId }) => albumId !== id,
+    );
+
+    const tracks = await this.trackService.findAll();
+
+    const foundTrack = tracks.find(({ albumId }) => albumId === id);
+
+    if (foundTrack) {
+      await this.trackService.update(foundTrack.id, { albumId: null });
+    }
+
+    await this.favouriteService.remove({ id, type: 'albums' });
 
     return Promise.resolve(album);
   }

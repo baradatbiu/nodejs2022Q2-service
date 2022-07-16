@@ -2,44 +2,68 @@ import {
   Controller,
   Get,
   Post,
-  Body,
-  Patch,
   Param,
   Delete,
+  HttpCode,
+  ParseUUIDPipe,
 } from '@nestjs/common';
 import { FavouriteService } from './favourite.service';
-import { CreateFavouriteDto } from './dto/create-favourite.dto';
-import { UpdateFavouriteDto } from './dto/update-favourite.dto';
 
-@Controller('favourite')
+@Controller('favs')
 export class FavouriteController {
   constructor(private readonly favouriteService: FavouriteService) {}
 
-  @Post()
-  create(@Body() createFavouriteDto: CreateFavouriteDto) {
-    return this.favouriteService.create(createFavouriteDto);
-  }
-
   @Get()
-  findAll() {
-    return this.favouriteService.findAll();
+  @HttpCode(200)
+  async findAll() {
+    return await this.favouriteService.findAll();
   }
 
-  @Get(':id')
-  findOne(@Param('id') id: string) {
-    return this.favouriteService.findOne(+id);
-  }
-
-  @Patch(':id')
-  update(
-    @Param('id') id: string,
-    @Body() updateFavouriteDto: UpdateFavouriteDto,
+  @Post('track/:id')
+  @HttpCode(201)
+  async createTrack(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ) {
-    return this.favouriteService.update(+id, updateFavouriteDto);
+    return await this.favouriteService.create({ id, type: 'tracks' });
   }
 
-  @Delete(':id')
-  remove(@Param('id') id: string) {
-    return this.favouriteService.remove(+id);
+  @Delete('track/:id')
+  @HttpCode(204)
+  async removeTrack(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
+    return await this.favouriteService.remove({ id, type: 'tracks' });
+  }
+
+  @Post('album/:id')
+  @HttpCode(201)
+  async createAlbum(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
+    return await this.favouriteService.create({ id, type: 'albums' });
+  }
+
+  @Delete('album/:id')
+  @HttpCode(204)
+  async removeAlbum(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
+    return await this.favouriteService.remove({ id, type: 'albums' });
+  }
+
+  @Post('artist/:id')
+  @HttpCode(201)
+  async createArtist(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
+    return await this.favouriteService.create({ id, type: 'artists' });
+  }
+
+  @Delete('artist/:id')
+  @HttpCode(204)
+  async removeArtist(
+    @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
+  ) {
+    return await this.favouriteService.remove({ id, type: 'artists' });
   }
 }

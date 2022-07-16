@@ -11,7 +11,7 @@ import { ERRORS } from './../types/Error';
 
 @Injectable()
 export class UserService {
-  private users: UserEntity[] = [];
+  private static users: UserEntity[] = [];
 
   create(createUserDto: CreateUserDto): Promise<UserEntity> {
     const user = new UserEntity({
@@ -22,17 +22,17 @@ export class UserService {
       updatedAt: Date.now(),
     });
 
-    this.users.push(user);
+    UserService.users.push(user);
 
     return Promise.resolve(user);
   }
 
   findAll(): Promise<UserEntity[]> {
-    return Promise.resolve(this.users);
+    return Promise.resolve(UserService.users);
   }
 
   findOne(id: string): Promise<UserEntity> {
-    const user = this.users.find(({ id: userId }) => userId === id);
+    const user = UserService.users.find(({ id: userId }) => userId === id);
 
     if (!user) throw new NotFoundException(ERRORS.NOT_FOUND);
 
@@ -43,7 +43,7 @@ export class UserService {
     id: string,
     { oldPassword, newPassword: password }: UpdateUserDto,
   ): Promise<UserEntity> {
-    const user = this.users.find(({ id: userId }) => userId === id);
+    const user = UserService.users.find(({ id: userId }) => userId === id);
 
     if (!user) throw new NotFoundException(ERRORS.NOT_FOUND);
     if (user.password !== oldPassword) {
@@ -60,11 +60,13 @@ export class UserService {
   }
 
   remove(id: string): Promise<UserEntity> {
-    const user = this.users.find(({ id: userId }) => userId === id);
+    const user = UserService.users.find(({ id: userId }) => userId === id);
 
     if (!user) throw new NotFoundException(ERRORS.NOT_FOUND);
 
-    this.users = this.users.filter(({ id: userId }) => userId !== id);
+    UserService.users = UserService.users.filter(
+      ({ id: userId }) => userId !== id,
+    );
 
     return Promise.resolve(user);
   }
