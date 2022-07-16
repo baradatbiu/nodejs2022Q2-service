@@ -1,3 +1,4 @@
+import { ArtistService } from './../artist/artist.service';
 import { FavouriteService } from './../favourite/favourite.service';
 import { TrackService } from './../track/track.service';
 import { ERRORS } from './../types/Error';
@@ -8,6 +9,7 @@ import {
   NotFoundException,
   forwardRef,
   Inject,
+  UnprocessableEntityException,
 } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
@@ -16,13 +18,26 @@ import { UpdateAlbumDto } from './dto/update-album.dto';
 export class AlbumService {
   constructor(
     private readonly trackService: TrackService,
+    @Inject(forwardRef(() => ArtistService))
+    private readonly artistService: ArtistService,
     @Inject(forwardRef(() => FavouriteService))
     private readonly favouriteService: FavouriteService,
   ) {}
 
   private static albums: AlbumEntity[] = [];
 
-  create(createAlbumDto: CreateAlbumDto): Promise<AlbumEntity> {
+  async create(createAlbumDto: CreateAlbumDto): Promise<AlbumEntity> {
+    if (createAlbumDto.artistId) {
+      try {
+        await this.artistService.findOne(createAlbumDto.artistId);
+      } catch (error) {
+        if (error.status === 404)
+          throw new UnprocessableEntityException(ERRORS.NOT_FOUND);
+
+        throw error;
+      }
+    }
+
     const album = new AlbumEntity({
       id: v4(),
       ...createAlbumDto,
@@ -60,6 +75,8 @@ export class AlbumService {
 
     if (!album) throw new NotFoundException(ERRORS.NOT_FOUND);
 
+    await this.favouriteService.remove({ id, type: 'albums' });
+
     AlbumService.albums = AlbumService.albums.filter(
       ({ id: albumId }) => albumId !== id,
     );
@@ -71,8 +88,6 @@ export class AlbumService {
     if (foundTrack) {
       await this.trackService.update(foundTrack.id, { albumId: null });
     }
-
-    await this.favouriteService.remove({ id, type: 'albums' });
 
     return Promise.resolve(album);
   }

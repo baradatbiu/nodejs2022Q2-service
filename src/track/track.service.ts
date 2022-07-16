@@ -58,11 +58,11 @@ export class TrackService {
 
     if (!track) throw new NotFoundException(ERRORS.NOT_FOUND);
 
+    await this.favouriteService.remove({ id, type: 'tracks' });
+
     TrackService.tracks = TrackService.tracks.filter(
       ({ id: trackId }) => trackId !== id,
     );
-
-    await this.favouriteService.remove({ id, type: 'tracks' });
 
     return Promise.resolve(track);
   }

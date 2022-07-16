@@ -1,3 +1,4 @@
+import { ArtistService } from './../artist/artist.service';
 import { ArtistModule } from './../artist/artist.module';
 import { FavouriteModule } from './../favourite/favourite.module';
 import { FavouriteService } from './../favourite/favourite.service';
@@ -9,7 +10,7 @@ import { AlbumController } from './album.controller';
 @Module({
   controllers: [AlbumController],
   imports: [forwardRef(() => FavouriteModule), forwardRef(() => ArtistModule)],
-  providers: [AlbumService, TrackService, FavouriteService],
+  providers: [AlbumService, TrackService, FavouriteService, ArtistService],
   exports: [AlbumService],
 })
 export class AlbumModule {}

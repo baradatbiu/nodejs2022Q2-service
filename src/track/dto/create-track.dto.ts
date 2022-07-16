@@ -20,5 +20,6 @@ export class CreateTrackDto {
   albumId: string | null;
 
   @IsNumber()
+  @IsNotEmpty()
   duration: number;
 }

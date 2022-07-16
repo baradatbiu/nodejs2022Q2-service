@@ -69,6 +69,8 @@ export class ArtistService {
 
     if (!artist) throw new NotFoundException(ERRORS.NOT_FOUND);
 
+    await this.favouriteService.remove({ id, type: 'artists' });
+
     ArtistService.artists = ArtistService.artists.filter(
       ({ id: artistId }) => artistId !== id,
     );
@@ -86,8 +88,6 @@ export class ArtistService {
     if (foundTrack) {
       await this.trackService.update(foundTrack.id, { artistId: null });
     }
-
-    await this.favouriteService.remove({ id, type: 'artists' });
 
     return Promise.resolve(artist);
   }
