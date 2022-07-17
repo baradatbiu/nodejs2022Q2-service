@@ -17,6 +17,7 @@ import { UpdateAlbumDto } from './dto/update-album.dto';
 @Injectable()
 export class AlbumService {
   constructor(
+    @Inject(forwardRef(() => TrackService))
     private readonly trackService: TrackService,
     @Inject(forwardRef(() => ArtistService))
     private readonly artistService: ArtistService,
@@ -75,7 +76,12 @@ export class AlbumService {
 
     if (!album) throw new NotFoundException(ERRORS.NOT_FOUND);
 
-    await this.favouriteService.remove({ id, type: 'albums' });
+    const { albums } = await this.favouriteService.findAll();
+    const hasInFavourites = albums.some(({ id: trackId }) => trackId === id);
+
+    if (hasInFavourites) {
+      await this.favouriteService.remove({ id, type: 'albums' });
+    }
 
     AlbumService.albums = AlbumService.albums.filter(
       ({ id: albumId }) => albumId !== id,

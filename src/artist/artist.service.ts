@@ -69,7 +69,12 @@ export class ArtistService {
 
     if (!artist) throw new NotFoundException(ERRORS.NOT_FOUND);
 
-    await this.favouriteService.remove({ id, type: 'artists' });
+    const { artists } = await this.favouriteService.findAll();
+    const hasInFavourites = artists.some(({ id: trackId }) => trackId === id);
+
+    if (hasInFavourites) {
+      await this.favouriteService.remove({ id, type: 'artists' });
+    }
 
     ArtistService.artists = ArtistService.artists.filter(
       ({ id: artistId }) => artistId !== id,

@@ -9,6 +9,8 @@ import {
   forwardRef,
   Inject,
   UnprocessableEntityException,
+  BadRequestException,
+  NotFoundException,
 } from '@nestjs/common';
 
 @Injectable()
@@ -59,16 +61,21 @@ export class FavouriteService {
       throw error;
     }
 
+    const alreadyExist = currentEntityArray.some((entityId) => entityId === id);
+
+    if (alreadyExist) throw new BadRequestException(ERRORS.ALREADY_EXIST);
+
     currentEntityArray.push(id);
 
-    return Promise.resolve();
+    return Promise.resolve('Added successfully');
   }
 
   async remove({ id, type }: { id: string; type: Entity }) {
     const currentEntityArray = FavouriteService.favourites[type];
-    const currentService = `${type.slice(0, -1)}Service`;
 
-    await this[currentService].findOne(id);
+    if (currentEntityArray.every((entityId) => entityId !== id)) {
+      throw new NotFoundException(ERRORS.NOT_FOUND);
+    }
 
     FavouriteService.favourites[type] = currentEntityArray.filter(
       (entityId) => entityId !== id,
