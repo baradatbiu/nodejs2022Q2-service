@@ -1,0 +1,52 @@
+version: '3.9'
+
+services:
+  homelibrary:
+    container_name: homelibrary
+    image: homelibrary
+    build:
+      context: .
+      dockerfile: ./docker/homelibrary/Dockerfile
+    environment:
+      PORT: "${PORT}"
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_HOST: db
+      POSTGRES_PORT: "${POSTGRES_PORT}"
+      POSTGRES_DB: "${POSTGRES_DB}"
+    networks:
+      - homelib-net
+    volumes:
+      - "./:/app"
+    ports:
+      - "${PORT}:${PORT}"
+    restart: always
+    depends_on:
+      - db
+
+  db:
+    container_name: postgresql
+    image: postgresql
+    build:
+      context: .
+      dockerfile: ./docker/postgresql/Dockerfile
+    environment:
+      POSTGRES_USER: "${POSTGRES_USER}"
+      POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
+      POSTGRES_DB: "${POSTGRES_DB}"
+    networks:
+      - homelib-net
+    volumes:
+      - db:/var/lib/postgresql/data
+    ports:
+      - "${POSTGRES_PORT}:${POSTGRES_PORT}"
+    restart: always
+
+volumes:
+  db:
+    driver: local
+
+networks:
+  homelib-net:
+    name: homelib-net
+    driver: bridge

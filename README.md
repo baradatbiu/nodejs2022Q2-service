@@ -17,15 +17,37 @@ or
 git clone https://github.com/baradatbiu/nodejs2022Q2-service.git
 ```
 
+## Running application in docker containers
+
+Build and run your app with Compose
+
+```
+npm run docker:build
+```
+
+Start services
+
+```
+npm run docker:start
+```
+
+Stop services
+
+```
+npm run docker:stop
+```
+
 ## Installing NPM modules
 
 ```
 npm install
 ```
 
-## Running application
+## Set env variables
 
-Copy `env.example` to `.env`
+Copy `.env.example` to `.env`
+
+## Running application
 
 ```
 npm start
@@ -42,35 +64,47 @@ After application running open new terminal and enter:
 To run all tests without authorization
 
 ```
+
 npm run test
+
 ```
 
 To run only one of all test suites
 
 ```
+
 npm run test -- <path to suite>
+
 ```
 
 <!-- To run all test with authorization
 
 ```
+
 npm run test:auth
+
 ```
 
 To run only specific test suite with authorization
 
 ```
+
 npm run test:auth -- <path to suite>
-``` -->
+
+```-->
 
 ### Auto-fix and format
 
 ```
+
 npm run lint
+
 ```
 
 ```
+
 npm run format
+
 ```
 
 ### Debugging in VSCode
@@ -78,3 +112,7 @@ npm run format
 Press <kbd>F5</kbd> to debug.
 
 For more information, visit: https://code.visualstudio.com/docs/editor/debugging
+
+```
+
+```
