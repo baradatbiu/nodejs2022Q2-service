@@ -17,10 +17,11 @@ services:
     networks:
       - homelib-net
     volumes:
-      - "./:/app"
+      - .:/usr/src/app
+      - /usr/src/app/node_modules
     ports:
       - "${PORT}:${PORT}"
-    restart: always
+    restart: unless-stopped
     depends_on:
       - db
 
@@ -34,17 +35,17 @@ services:
       POSTGRES_USER: "${POSTGRES_USER}"
       POSTGRES_PASSWORD: "${POSTGRES_PASSWORD}"
       POSTGRES_DB: "${POSTGRES_DB}"
+      PG_DATA: /var/lib/postgresql/data
     networks:
       - homelib-net
     volumes:
       - db:/var/lib/postgresql/data
     ports:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
-    restart: always
+    restart: unless-stopped
 
 volumes:
   db:
-    driver: local
 
 networks:
   homelib-net:
