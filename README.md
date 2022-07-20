@@ -37,6 +37,32 @@ Stop services
 npm run docker:stop
 ```
 
+Scan homelibrary image
+
+```
+npm run docker:scan:app
+```
+
+Scan postgreql image
+
+```
+npm run docker:scan:db
+```
+
+## Remote homelibrary docker images
+
+Postgresql database
+
+```
+docker pull kharlamovdm/homelibrary:db
+```
+
+Rest service
+
+```
+docker pull kharlamovdm/homelibrary:rest-service
+```
+
 ## Installing NPM modules
 
 ```
