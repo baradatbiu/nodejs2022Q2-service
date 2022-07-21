@@ -1,11 +1,32 @@
+import { AlbumEntity } from './../../album/entities/album.entity';
+import { ArtistEntity } from './../../artist/entities/artist.entity';
 import { Track } from './../interfaces/track.interface';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
+@Entity('track')
 export class TrackEntity implements Track {
-  id: string; // uuid v4
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column()
   name: string;
-  artistId: string | null; // refers to Artist
-  albumId: string | null; // refers to Album
-  duration: number; // integer number
+
+  @OneToOne(() => ArtistEntity)
+  @JoinColumn()
+  artist: [ArtistEntity];
+
+  @OneToOne(() => AlbumEntity)
+  @JoinColumn()
+  album: [AlbumEntity];
+
+  @Column()
+  duration: number;
 
   constructor(partial: Partial<TrackEntity>) {
     Object.assign(this, partial);

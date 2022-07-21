@@ -73,10 +73,6 @@ export class AlbumService {
     //   await this.favouriteService.remove({ id, type: 'albums' });
     // }
 
-    // AlbumService.albums = AlbumService.albums.filter(
-    //   ({ id: albumId }) => albumId !== id,
-    // );
-
     // const tracks = await this.trackService.findAll();
 
     // const foundTrack = tracks.find(({ albumId }) => albumId === id);
