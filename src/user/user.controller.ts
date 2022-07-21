@@ -58,7 +58,7 @@ export class UserController {
   @HttpCode(204)
   async remove(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ): Promise<UserEntity> {
-    return await this.userService.remove(id);
+  ): Promise<void> {
+    await this.userService.remove(id);
   }
 }
