@@ -53,7 +53,7 @@ export class ArtistController {
   @HttpCode(204)
   async remove(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ): Promise<ArtistEntity> {
-    return await this.artistService.remove(id);
+  ): Promise<void> {
+    await this.artistService.remove(id);
   }
 }
