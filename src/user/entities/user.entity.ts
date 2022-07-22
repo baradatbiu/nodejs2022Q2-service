@@ -1,5 +1,5 @@
 import { User } from './../interfaces/user.interface';
-import { Exclude } from 'class-transformer';
+import { Exclude, Transform } from 'class-transformer';
 import {
   Column,
   CreateDateColumn,
@@ -24,9 +24,11 @@ export class UserEntity implements User {
   @VersionColumn()
   version: number;
 
+  @Transform(({ value }) => value.getTime())
   @CreateDateColumn()
   createdAt: number;
 
+  @Transform(({ value }) => value.getTime())
   @UpdateDateColumn()
   updatedAt: number;
 
