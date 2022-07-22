@@ -7,6 +7,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { TrackEntity } from 'src/track/entities/track.entity';
 
 @Entity('albums')
 export class AlbumEntity implements Album {
@@ -25,6 +26,10 @@ export class AlbumEntity implements Album {
   @OneToOne(() => ArtistEntity, { onDelete: 'SET NULL' })
   @JoinColumn()
   artist: ArtistEntity;
+
+  @OneToOne(() => TrackEntity)
+  @JoinColumn()
+  track: TrackEntity;
 
   constructor(partial: Partial<AlbumEntity>) {
     Object.assign(this, partial);

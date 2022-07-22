@@ -7,6 +7,7 @@ import {
   OneToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
+import { TrackEntity } from 'src/track/entities/track.entity';
 
 @Entity('artists')
 export class ArtistEntity implements Artist {
@@ -22,6 +23,10 @@ export class ArtistEntity implements Artist {
   @OneToOne(() => AlbumEntity)
   @JoinColumn()
   album: AlbumEntity;
+
+  @OneToOne(() => TrackEntity)
+  @JoinColumn()
+  track: TrackEntity;
 
   constructor(partial: Partial<ArtistEntity>) {
     Object.assign(this, partial);

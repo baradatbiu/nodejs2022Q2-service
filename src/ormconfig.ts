@@ -1,6 +1,10 @@
 import 'dotenv/config';
 import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
+import { AlbumEntity } from './album/entities/album.entity';
+import { ArtistEntity } from './artist/entities/artist.entity';
+import { UserEntity } from './user/entities/user.entity';
+import { TrackEntity } from './track/entities/track.entity';
 
 const configService = new ConfigService();
 
@@ -17,8 +21,8 @@ const connectionSource = new DataSource({
   migrationsTableName: configService.get<string>(
     'TYPEORM_MIGRATIONS_TABLE_NAME',
   ),
-  entities: [__dirname + '/**/*.entity{.ts,.js}'],
-  migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
+  entities: [UserEntity, ArtistEntity, AlbumEntity, TrackEntity],
+  migrations: [__dirname + 'dist/migrations/**/*{.ts,.js}'],
 });
 
 export default connectionSource;

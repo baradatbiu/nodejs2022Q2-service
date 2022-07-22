@@ -9,7 +9,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-@Entity('track')
+@Entity('tracks')
 export class TrackEntity implements Track {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -17,16 +17,22 @@ export class TrackEntity implements Track {
   @Column()
   name: string;
 
-  @OneToOne(() => ArtistEntity)
-  @JoinColumn()
-  artist: [ArtistEntity];
-
-  @OneToOne(() => AlbumEntity)
-  @JoinColumn()
-  album: [AlbumEntity];
-
   @Column()
   duration: number;
+
+  @Column({ nullable: true })
+  artistId: string;
+
+  @OneToOne(() => ArtistEntity, { onDelete: 'SET NULL' })
+  @JoinColumn()
+  artist: ArtistEntity;
+
+  @Column({ nullable: true })
+  albumId: string;
+
+  @OneToOne(() => AlbumEntity, { onDelete: 'SET NULL' })
+  @JoinColumn()
+  album: AlbumEntity;
 
   constructor(partial: Partial<TrackEntity>) {
     Object.assign(this, partial);
