@@ -8,7 +8,7 @@ import {
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
-@Entity('album')
+@Entity('albums')
 export class AlbumEntity implements Album {
   @PrimaryGeneratedColumn('uuid')
   id: string;
@@ -22,7 +22,7 @@ export class AlbumEntity implements Album {
   @Column({ nullable: true })
   artistId: string;
 
-  @OneToOne(() => ArtistEntity)
+  @OneToOne(() => ArtistEntity, { onDelete: 'SET NULL' })
   @JoinColumn()
   artist: ArtistEntity;
 

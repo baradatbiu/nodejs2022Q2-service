@@ -9,7 +9,7 @@ import {
   VersionColumn,
 } from 'typeorm';
 
-@Entity('user')
+@Entity('users')
 export class UserEntity implements User {
   @PrimaryGeneratedColumn('uuid')
   id: string;
