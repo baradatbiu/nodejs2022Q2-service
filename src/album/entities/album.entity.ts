@@ -19,9 +19,12 @@ export class AlbumEntity implements Album {
   @Column()
   year: number;
 
+  @Column({ nullable: true })
+  artistId: string;
+
   @OneToOne(() => ArtistEntity)
   @JoinColumn()
-  artist: [ArtistEntity];
+  artist: ArtistEntity;
 
   constructor(partial: Partial<AlbumEntity>) {
     Object.assign(this, partial);

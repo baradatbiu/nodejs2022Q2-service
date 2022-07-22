@@ -1,5 +1,12 @@
+import { AlbumEntity } from './../../album/entities/album.entity';
 import { Artist } from './../interfaces/artist.interface';
-import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  OneToOne,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 
 @Entity('artist')
 export class ArtistEntity implements Artist {
@@ -11,6 +18,10 @@ export class ArtistEntity implements Artist {
 
   @Column()
   grammy: boolean;
+
+  @OneToOne(() => AlbumEntity)
+  @JoinColumn()
+  album: AlbumEntity;
 
   constructor(partial: Partial<ArtistEntity>) {
     Object.assign(this, partial);
