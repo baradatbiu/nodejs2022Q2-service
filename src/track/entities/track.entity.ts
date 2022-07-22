@@ -5,7 +5,7 @@ import {
   Column,
   Entity,
   JoinColumn,
-  OneToOne,
+  ManyToOne,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 
@@ -23,14 +23,19 @@ export class TrackEntity implements Track {
   @Column({ nullable: true })
   artistId: string;
 
-  @OneToOne(() => ArtistEntity, { onDelete: 'SET NULL' })
+  @ManyToOne(() => ArtistEntity, (artist) => artist.album, {
+    onDelete: 'SET NULL',
+  })
   @JoinColumn()
   artist: ArtistEntity;
 
   @Column({ nullable: true })
   albumId: string;
 
-  @OneToOne(() => AlbumEntity, { onDelete: 'SET NULL' })
+  @ManyToOne(() => AlbumEntity, (album) => album.track, {
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn()
   @JoinColumn()
   album: AlbumEntity;
 

@@ -1,12 +1,6 @@
 import { AlbumEntity } from './../../album/entities/album.entity';
 import { Artist } from './../interfaces/artist.interface';
-import {
-  Column,
-  Entity,
-  JoinColumn,
-  OneToOne,
-  PrimaryGeneratedColumn,
-} from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
 import { TrackEntity } from 'src/track/entities/track.entity';
 
 @Entity('artists')
@@ -20,13 +14,11 @@ export class ArtistEntity implements Artist {
   @Column()
   grammy: boolean;
 
-  @OneToOne(() => AlbumEntity)
-  @JoinColumn()
-  album: AlbumEntity;
+  @OneToMany(() => AlbumEntity, (album) => album.artist)
+  album: AlbumEntity[];
 
-  @OneToOne(() => TrackEntity)
-  @JoinColumn()
-  track: TrackEntity;
+  @OneToMany(() => TrackEntity, (track) => track.artist)
+  track: TrackEntity[];
 
   constructor(partial: Partial<ArtistEntity>) {
     Object.assign(this, partial);

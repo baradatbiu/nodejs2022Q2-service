@@ -1,9 +1,9 @@
 import 'dotenv/config';
-import { ConfigService } from '@nestjs/config';
-import { DataSource } from 'typeorm';
 import { AlbumEntity } from './album/entities/album.entity';
 import { ArtistEntity } from './artist/entities/artist.entity';
 import { UserEntity } from './user/entities/user.entity';
+import { ConfigService } from '@nestjs/config';
+import { DataSource } from 'typeorm';
 import { TrackEntity } from './track/entities/track.entity';
 
 const configService = new ConfigService();
@@ -15,7 +15,7 @@ const connectionSource = new DataSource({
   username: configService.get<string>('POSTGRES_USER'),
   password: configService.get<string>('POSTGRES_PASSWORD'),
   database: configService.get<string>('POSTGRES_DB'),
-  synchronize: configService.get<boolean>('TYPEORM_SYNCHRONIZE'),
+  synchronize: false,
   logging: configService.get<boolean>('TYPEORM_LOGGING'),
   migrationsRun: configService.get<boolean>('TYPEORM_MIGRATIONS_RUN'),
   migrationsTableName: configService.get<string>(

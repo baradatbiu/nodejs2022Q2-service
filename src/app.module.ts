@@ -25,7 +25,7 @@ import { TrackEntity } from './track/entities/track.entity';
         username: configService.get<string>('POSTGRES_USER'),
         password: configService.get<string>('POSTGRES_PASSWORD'),
         database: configService.get<string>('POSTGRES_DB'),
-        synchronize: configService.get<boolean>('TYPEORM_SYNCHRONIZE'),
+        synchronize: false,
         logging: configService.get<boolean>('TYPEORM_LOGGING'),
         migrationsRun: configService.get<boolean>('TYPEORM_MIGRATIONS_RUN'),
         migrationsTableName: configService.get<string>(
