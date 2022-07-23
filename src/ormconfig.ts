@@ -5,6 +5,7 @@ import { UserEntity } from './user/entities/user.entity';
 import { ConfigService } from '@nestjs/config';
 import { DataSource } from 'typeorm';
 import { TrackEntity } from './track/entities/track.entity';
+import { FavouriteEntity } from './favourite/entities/favourite.entity';
 
 const configService = new ConfigService();
 
@@ -21,7 +22,13 @@ const connectionSource = new DataSource({
   migrationsTableName: configService.get<string>(
     'TYPEORM_MIGRATIONS_TABLE_NAME',
   ),
-  entities: [UserEntity, ArtistEntity, AlbumEntity, TrackEntity],
+  entities: [
+    UserEntity,
+    ArtistEntity,
+    AlbumEntity,
+    TrackEntity,
+    FavouriteEntity,
+  ],
   migrations: [__dirname + 'dist/migrations/**/*{.ts,.js}'],
 });
 

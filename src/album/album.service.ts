@@ -62,23 +62,8 @@ export class AlbumService {
   }
 
   async remove(id: string): Promise<void> {
-    const { affected } = await this.albumsRepository.delete({ id });
+    const { affected } = await this.albumsRepository.delete(id);
 
     if (affected === 0) throw new NotFoundException(ERRORS.NOT_FOUND);
-
-    // const { albums } = await this.favouriteService.findAll();
-    // const hasInFavourites = albums.some(({ id: trackId }) => trackId === id);
-
-    // if (hasInFavourites) {
-    //   await this.favouriteService.remove({ id, type: 'albums' });
-    // }
-
-    // const tracks = await this.trackService.findAll();
-
-    // const foundTrack = tracks.find(({ albumId }) => albumId === id);
-
-    // if (foundTrack) {
-    //   await this.trackService.update(foundTrack.id, { albumId: null });
-    // }
   }
 }

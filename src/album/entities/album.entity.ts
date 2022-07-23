@@ -1,3 +1,4 @@
+import { FavouriteEntity } from './../../favourite/entities/favourite.entity';
 import { ArtistEntity } from './../../artist/entities/artist.entity';
 import { Album } from './../interfaces/album.interface';
 import {
@@ -31,7 +32,13 @@ export class AlbumEntity implements Album {
   artist: ArtistEntity;
 
   @OneToMany(() => TrackEntity, (track) => track.album)
-  track: TrackEntity;
+  track: TrackEntity[];
+
+  @ManyToOne(() => FavouriteEntity, (favourite) => favourite.albums, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  favourite: FavouriteEntity;
 
   constructor(partial: Partial<AlbumEntity>) {
     Object.assign(this, partial);

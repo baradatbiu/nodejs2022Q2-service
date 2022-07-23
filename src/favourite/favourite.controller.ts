@@ -6,6 +6,8 @@ import {
   Delete,
   HttpCode,
   ParseUUIDPipe,
+  UseInterceptors,
+  ClassSerializerInterceptor,
 } from '@nestjs/common';
 import { FavouriteService } from './favourite.service';
 
@@ -13,6 +15,7 @@ import { FavouriteService } from './favourite.service';
 export class FavouriteController {
   constructor(private readonly favouriteService: FavouriteService) {}
 
+  @UseInterceptors(ClassSerializerInterceptor)
   @Get()
   @HttpCode(200)
   async findAll() {
@@ -56,7 +59,7 @@ export class FavouriteController {
   async createArtist(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ) {
-    return await this.favouriteService.create({ id, type: 'artists' });
+    await this.favouriteService.create({ id, type: 'artists' });
   }
 
   @Delete('artist/:id')
@@ -64,6 +67,6 @@ export class FavouriteController {
   async removeArtist(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ) {
-    return await this.favouriteService.remove({ id, type: 'artists' });
+    await this.favouriteService.remove({ id, type: 'artists' });
   }
 }

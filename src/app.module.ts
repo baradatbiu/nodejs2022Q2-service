@@ -4,13 +4,14 @@ import { UserModule } from './user/user.module';
 import { TrackModule } from './track/track.module';
 import { ArtistModule } from './artist/artist.module';
 import { AlbumModule } from './album/album.module';
-// import { FavouriteModule } from './favourite/favourite.module';
+import { FavouriteModule } from './favourite/favourite.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { DataSource } from 'typeorm';
 import { AlbumEntity } from './album/entities/album.entity';
 import { ArtistEntity } from './artist/entities/artist.entity';
 import { UserEntity } from './user/entities/user.entity';
 import { TrackEntity } from './track/entities/track.entity';
+import { FavouriteEntity } from './favourite/entities/favourite.entity';
 
 @Module({
   imports: [
@@ -31,7 +32,13 @@ import { TrackEntity } from './track/entities/track.entity';
         migrationsTableName: configService.get<string>(
           'TYPEORM_MIGRATIONS_TABLE_NAME',
         ),
-        entities: [UserEntity, ArtistEntity, AlbumEntity, TrackEntity],
+        entities: [
+          UserEntity,
+          ArtistEntity,
+          AlbumEntity,
+          TrackEntity,
+          FavouriteEntity,
+        ],
         migrations: [__dirname + '/migrations/**/*{.ts,.js}'],
       }),
       dataSourceFactory: async (options) => {
@@ -42,7 +49,7 @@ import { TrackEntity } from './track/entities/track.entity';
     TrackModule,
     ArtistModule,
     AlbumModule,
-    // FavouriteModule,
+    FavouriteModule,
   ],
 })
 export class AppModule {}

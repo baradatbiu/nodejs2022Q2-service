@@ -1,6 +1,14 @@
+import { FavouriteEntity } from './../../favourite/entities/favourite.entity';
 import { AlbumEntity } from './../../album/entities/album.entity';
 import { Artist } from './../interfaces/artist.interface';
-import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
 import { TrackEntity } from 'src/track/entities/track.entity';
 
 @Entity('artists')
@@ -19,6 +27,12 @@ export class ArtistEntity implements Artist {
 
   @OneToMany(() => TrackEntity, (track) => track.artist)
   track: TrackEntity[];
+
+  @ManyToOne(() => FavouriteEntity, (favourite) => favourite.artists, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  favourite: FavouriteEntity[];
 
   constructor(partial: Partial<ArtistEntity>) {
     Object.assign(this, partial);
