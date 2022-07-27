@@ -19,7 +19,7 @@ git clone https://github.com/baradatbiu/nodejs2022Q2-service.git
 
 ## Running application in docker containers
 
-Build and run your app with Compose
+Build and run your app with Compose. This will also run migrations.
 
 ```
 npm run docker:build
@@ -47,6 +47,44 @@ Scan postgreql image
 
 ```
 npm run docker:scan:db
+```
+
+Delete all docker images, stopped containers, volumes and build cash
+
+```
+npm run docker:clean
+```
+
+## Work with migrations
+
+Run migrations
+
+```
+npm run migration:run
+```
+
+Show all existing migrations
+
+```
+npm run migration:show
+```
+
+Generate a new migration
+
+```
+npm run migration:generate [path]
+```
+
+Revert last migration
+
+```
+npm run migration:revert
+```
+
+Drop database
+
+```
+npm run db:drop
 ```
 
 ## Remote homelibrary docker images
