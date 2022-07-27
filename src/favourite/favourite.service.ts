@@ -1,6 +1,6 @@
-import { AlbumEntity } from './../album/entities/album.entity';
-import { TrackEntity } from 'src/track/entities/track.entity';
-import { ArtistEntity } from './../artist/entities/artist.entity';
+import { ArtistService } from './../artist/artist.service';
+import { TrackService } from './../track/track.service';
+import { AlbumService } from './../album/album.service';
 import { ERRORS } from './../types/Error';
 import { FavouriteEntity } from './entities/favourite.entity';
 import { Entity } from './../types/Favourite';
@@ -18,12 +18,9 @@ export class FavouriteService {
   constructor(
     @InjectRepository(FavouriteEntity)
     private favouritesRepository: Repository<FavouriteEntity>,
-    @InjectRepository(ArtistEntity)
-    private artistsRepository: Repository<ArtistEntity>,
-    @InjectRepository(TrackEntity)
-    private tracksRepository: Repository<TrackEntity>,
-    @InjectRepository(AlbumEntity)
-    private albumsRepository: Repository<AlbumEntity>,
+    private readonly albumService: AlbumService,
+    private readonly trackService: TrackService,
+    private readonly artistService: ArtistService,
   ) {
     this.init();
   }
@@ -60,15 +57,16 @@ export class FavouriteService {
 
     if (alreadyExist) throw new BadRequestException(ERRORS.ALREADY_EXIST);
 
-    const currentRepository = `${type}Repository`;
+    const currentService = `${type.slice(0, -1)}Service`;
 
-    const artist = await this[currentRepository].findOneBy({ id });
+    try {
+      await this[currentService].update(id, { favourite });
+    } catch (error) {
+      if (error.status === 404)
+        throw new UnprocessableEntityException(ERRORS.NOT_FOUND);
 
-    if (!artist) throw new UnprocessableEntityException(ERRORS.NOT_FOUND);
-
-    Object.assign(artist, { favourite });
-
-    await this[currentRepository].save(artist);
+      throw error;
+    }
 
     return Promise.resolve('Added successfully');
   }

@@ -1,5 +1,6 @@
+import { FavouriteModule } from './../favourite/favourite.module';
 import { AlbumEntity } from './entities/album.entity';
-import { Module } from '@nestjs/common';
+import { forwardRef, Module } from '@nestjs/common';
 import { AlbumService } from './album.service';
 import { AlbumController } from './album.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -8,5 +9,6 @@ import { TypeOrmModule } from '@nestjs/typeorm';
   controllers: [AlbumController],
   imports: [TypeOrmModule.forFeature([AlbumEntity])],
   providers: [AlbumService],
+  exports: [AlbumService],
 })
 export class AlbumModule {}

@@ -1,10 +1,6 @@
 import { ERRORS } from './../types/Error';
 import { AlbumEntity } from './entities/album.entity';
-import {
-  Injectable,
-  NotFoundException,
-  // UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -18,17 +14,6 @@ export class AlbumService {
   ) {}
 
   async create(createAlbumDto: CreateAlbumDto): Promise<AlbumEntity> {
-    // if (createAlbumDto.artistId) {
-    //   try {
-    //     await this.artistService.findOne(createAlbumDto.artistId);
-    //   } catch (error) {
-    //     if (error.status === 404)
-    //       throw new UnprocessableEntityException(ERRORS.NOT_FOUND);
-
-    //     throw error;
-    //   }
-    // }
-
     const album = this.albumsRepository.create({
       ...createAlbumDto,
     });

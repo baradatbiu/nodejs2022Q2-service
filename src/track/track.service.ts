@@ -1,9 +1,5 @@
 import { ERRORS } from './../types/Error';
-import {
-  Injectable,
-  NotFoundException,
-  // UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { TrackEntity } from './entities/track.entity';
@@ -18,28 +14,6 @@ export class TrackService {
   ) {}
 
   async create(createTrackDto: CreateTrackDto): Promise<TrackEntity> {
-    // if (createTrackDto.artistId) {
-    //   try {
-    //     await this.artistService.findOne(createTrackDto.artistId);
-    //   } catch (error) {
-    //     if (error.status === 404)
-    //       throw new UnprocessableEntityException(ERRORS.NOT_FOUND);
-
-    //     throw error;
-    //   }
-    // }
-
-    // if (createTrackDto.albumId) {
-    //   try {
-    //     await this.albumService.findOne(createTrackDto.albumId);
-    //   } catch (error) {
-    //     if (error.status === 404)
-    //       throw new UnprocessableEntityException(ERRORS.NOT_FOUND);
-
-    //     throw error;
-    //   }
-    // }
-
     const track = this.tracksRepository.create({
       ...createTrackDto,
     });
