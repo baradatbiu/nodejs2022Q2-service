@@ -1,4 +1,3 @@
-import 'dotenv/config';
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { dirname, join } from 'path';
@@ -6,6 +5,9 @@ import { readFile } from 'fs/promises';
 import { SwaggerModule } from '@nestjs/swagger';
 import { parse } from 'yaml';
 import { ValidationPipe } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+
+const configService = new ConfigService();
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
@@ -21,7 +23,7 @@ async function bootstrap() {
 
   SwaggerModule.setup('doc', app, document);
 
-  await app.listen(process.env.PORT || 4000, '0.0.0.0');
+  await app.listen(+configService.get<number>('PORT') || 4000, '0.0.0.0');
 
   console.log(`Application is running on: ${await app.getUrl()}`);
 }
