@@ -40,7 +40,7 @@ export class UserController {
   async findOne(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
   ): Promise<UserEntity> {
-    return await this.userService.findOne(id);
+    return await this.userService.findOneById(id);
   }
 
   @UseInterceptors(ClassSerializerInterceptor)
