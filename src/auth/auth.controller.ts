@@ -1,3 +1,4 @@
+import { UserEntity } from './../user/entities/user.entity';
 import { LoginDto } from './dto/login.dto';
 import { Controller, Post, Body, HttpCode } from '@nestjs/common';
 import { AuthService } from './auth.service';
@@ -11,8 +12,8 @@ export class AuthController {
   @Public()
   @Post('signup')
   @HttpCode(201)
-  async signin(@Body() registerDto: RegisterDto): Promise<string> {
-    return await this.authService.signin(registerDto);
+  async signup(@Body() registerDto: RegisterDto): Promise<UserEntity> {
+    return await this.authService.signup(registerDto);
   }
 
   @Public()
@@ -20,7 +21,7 @@ export class AuthController {
   @HttpCode(200)
   async login(
     @Body() loginDto: LoginDto,
-  ): Promise<{ access_token: string; refresh_token: string }> {
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     return await this.authService.login(loginDto);
   }
 
@@ -29,7 +30,7 @@ export class AuthController {
   @HttpCode(200)
   async refresh(
     @Body() { refreshToken }: { refreshToken: string },
-  ): Promise<{ access_token: string; refresh_token: string }> {
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     return await this.authService.refresh(refreshToken);
   }
 }

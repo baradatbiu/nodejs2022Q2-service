@@ -1,3 +1,4 @@
+import { UserEntity } from './../user/entities/user.entity';
 import { LoginDto } from './dto/login.dto';
 import { UserService } from './../user/user.service';
 import { RegisterDto } from './dto/register.dto';
@@ -20,20 +21,18 @@ export class AuthService {
     private jwtService: JwtService,
   ) {}
 
-  async signin(registerDto: RegisterDto): Promise<string> {
+  async signup(registerDto: RegisterDto): Promise<UserEntity> {
     const password = await bcrypt.hash(
       registerDto.password,
       +configService.get<number>('CRYPT_SALT'),
     );
 
-    await this.usersService.create({ ...registerDto, password });
-
-    return Promise.resolve('The user has been successfully registered.');
+    return await this.usersService.create({ ...registerDto, password });
   }
 
   async login(
     loginDto: LoginDto,
-  ): Promise<{ access_token: string; refresh_token: string }> {
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     const { login, password } = loginDto;
 
     const user = await this.usersService.findOneByLogin(login);
@@ -47,8 +46,8 @@ export class AuthService {
     const payload = { userId: user.id, login: user.login };
 
     return {
-      access_token: await this.jwtService.sign(payload),
-      refresh_token: await this.jwtService.sign(payload, {
+      accessToken: await this.jwtService.sign(payload),
+      refreshToken: await this.jwtService.sign(payload, {
         secret: configService.get<string>('JWT_SECRET_REFRESH_KEY'),
         expiresIn: configService.get<string>('TOKEN_REFRESH_EXPIRE_TIME'),
       }),
@@ -57,7 +56,7 @@ export class AuthService {
 
   async refresh(
     refreshToken: string,
-  ): Promise<{ access_token: string; refresh_token: string }> {
+  ): Promise<{ accessToken: string; refreshToken: string }> {
     if (!refreshToken)
       throw new UnauthorizedException(ERRORS.REFRESH_TOKEN_FAILED);
 
@@ -69,8 +68,8 @@ export class AuthService {
       const payload = { userId: tokenData.userId, login: tokenData.login };
 
       return {
-        access_token: await this.jwtService.sign(payload),
-        refresh_token: await this.jwtService.sign(payload, {
+        accessToken: await this.jwtService.sign(payload),
+        refreshToken: await this.jwtService.sign(payload, {
           secret: configService.get<string>('JWT_SECRET_REFRESH_KEY'),
           expiresIn: configService.get<string>('TOKEN_REFRESH_EXPIRE_TIME'),
         }),
