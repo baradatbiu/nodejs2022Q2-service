@@ -21,8 +21,6 @@ git clone https://github.com/baradatbiu/nodejs2022Q2-service.git
 
 Build and run your app with Compose. This will also run migrations.
 
-http://localhost:4000
-
 ```
 npm run docker:build
 ```
