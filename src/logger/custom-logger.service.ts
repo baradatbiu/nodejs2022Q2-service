@@ -1,22 +1,20 @@
-import { Injectable, Scope, ConsoleLogger, LogLevel } from '@nestjs/common';
+import { join, resolve } from 'path';
+import { Injectable, Scope, ConsoleLogger } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as fs from 'fs';
+import { mkdir } from 'fs/promises';
 
 @Injectable({ scope: Scope.TRANSIENT })
 export class CustomLogger extends ConsoleLogger {
   fileName = '';
-  fileSize = 2000;
+  fileSize = 100;
+  logLevel = 3;
 
   constructor(private readonly configService: ConfigService) {
     super();
 
-    const isProd = this.configService.get('NODE_ENV') === 'production';
-    const logLevels: LogLevel[] = isProd
-      ? ['log', 'warn', 'error']
-      : ['error', 'warn', 'log', 'verbose', 'debug'];
-
-    this.setLogLevels(logLevels);
-    this.fileSize = Number(configService.get('LOG_FILE_SIZE'));
+    this.logLevel = Number(configService.get('LOG_LEVEL'));
+    this.fileSize = Number(configService.get('LOG_FILE_SIZE')) * 1024;
   }
 
   log(message: string, context?: string) {
@@ -25,11 +23,15 @@ export class CustomLogger extends ConsoleLogger {
   }
 
   error(message: string, context?: string) {
+    if (this.logLevel < 2) return;
+
     super.error.apply(this, [`\n${message}`, context]);
     this.writeLogToFile(message, 'error', context);
   }
 
   warn(message: string, context?: string) {
+    if (this.logLevel < 3) return;
+
     super.warn.apply(this, [`\n${message}`, context]);
     this.writeLogToFile(message, 'warn', context);
   }
@@ -47,51 +49,54 @@ export class CustomLogger extends ConsoleLogger {
     type: string,
     context?: string,
   ): void => {
-    const amended = `\n${type.toUpperCase()} ${
-      context
-        ? '[' + context + ']'
-        : this.context
-        ? '[' + this.context + ']'
-        : ''
-    } ${message}`;
+    const contextInfo = context
+      ? '[' + context + ']'
+      : this.context
+      ? '[' + this.context + ']'
+      : '';
+
+    const amended = `\n${type.toUpperCase()} ${contextInfo} ${message}`;
 
     if (!this.fileName) {
-      this.createFileAndSave(amended, this.context);
+      this.createFile(amended, this.context);
     } else {
-      this.amendFile(amended, this.context);
+      this.updateFile(amended, this.context);
     }
   };
 
-  createFileAndSave(message: string, context: string) {
-    if (!context) return;
-
+  setFileName({ context }) {
     const type = context === 'LoggerMiddleware' ? 'logs' : 'errors';
 
     this.fileName = `${type}_${context}_${Date.now()}.log`;
-
-    fs.appendFile(this.fileName, `${message}`, 'utf8', (err) => {
-      if (err) throw err;
-    });
   }
 
-  amendFile(message: string, context: string) {
-    fs.stat(this.fileName, (err, stat) => {
+  async createFile(message: string, context: string, newFile = true) {
+    if (!context) return;
+
+    await mkdir(join(process.cwd(), 'logs'), { recursive: true });
+
+    if (newFile) this.setFileName({ context });
+
+    fs.appendFile(
+      resolve('logs', this.fileName),
+      `${message}`,
+      'utf8',
+      (err) => {
+        if (err) throw err;
+      },
+    );
+  }
+
+  updateFile(message: string, context: string) {
+    fs.stat(resolve('logs', this.fileName), (err, stat) => {
       if (err) {
         const message = `Fail to open file ${this.fileName}`;
 
         super.log.apply(this, [message, context]);
       } else {
-        const fileSize = stat.size;
+        const newFile = stat.size > this.fileSize;
 
-        if (fileSize > this.fileSize) {
-          const type = context === 'LoggerMiddleware' ? 'logs' : 'errors';
-
-          this.fileName = `${type}_${context}_${Date.now()}.log`;
-        }
-
-        fs.appendFile(this.fileName, `${message}`, 'utf8', (err) => {
-          if (err) throw err;
-        });
+        this.createFile(message, context, newFile);
       }
     });
   }
