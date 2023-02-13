@@ -29,12 +29,16 @@ export class UserService {
     return await this.usersRepository.find();
   }
 
-  async findOne(id: string): Promise<UserEntity> {
+  async findOneById(id: string): Promise<UserEntity> {
     const user = await this.usersRepository.findOneBy({ id });
 
     if (!user) throw new NotFoundException(ERRORS.NOT_FOUND);
 
     return user;
+  }
+
+  async findOneByLogin(login: string): Promise<UserEntity> {
+    return await this.usersRepository.findOneBy({ login });
   }
 
   async update(
