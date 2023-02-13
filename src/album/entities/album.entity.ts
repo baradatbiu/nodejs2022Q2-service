@@ -1,10 +1,44 @@
+import { FavouriteEntity } from './../../favourite/entities/favourite.entity';
+import { ArtistEntity } from './../../artist/entities/artist.entity';
 import { Album } from './../interfaces/album.interface';
+import {
+  Column,
+  Entity,
+  JoinColumn,
+  ManyToOne,
+  OneToMany,
+  PrimaryGeneratedColumn,
+} from 'typeorm';
+import { TrackEntity } from 'src/track/entities/track.entity';
 
+@Entity('albums')
 export class AlbumEntity implements Album {
-  id: string; // uuid v4
+  @PrimaryGeneratedColumn('uuid')
+  id: string;
+
+  @Column()
   name: string;
+
+  @Column()
   year: number;
-  artistId: string | null; // refers to Artist
+
+  @Column({ nullable: true })
+  artistId: string;
+
+  @ManyToOne(() => ArtistEntity, (artist) => artist.album, {
+    onDelete: 'SET NULL',
+  })
+  @JoinColumn()
+  artist: ArtistEntity;
+
+  @OneToMany(() => TrackEntity, (track) => track.album)
+  track: TrackEntity[];
+
+  @ManyToOne(() => FavouriteEntity, (favourite) => favourite.albums, {
+    onDelete: 'CASCADE',
+  })
+  @JoinColumn()
+  favourite: FavouriteEntity;
 
   constructor(partial: Partial<AlbumEntity>) {
     Object.assign(this, partial);

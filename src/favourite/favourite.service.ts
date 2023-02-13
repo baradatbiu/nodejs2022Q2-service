@@ -1,59 +1,66 @@
-import { ERRORS } from './../types/Error';
 import { ArtistService } from './../artist/artist.service';
 import { TrackService } from './../track/track.service';
 import { AlbumService } from './../album/album.service';
+import { ERRORS } from './../types/Error';
 import { FavouriteEntity } from './entities/favourite.entity';
 import { Entity } from './../types/Favourite';
 import {
   Injectable,
-  forwardRef,
-  Inject,
   UnprocessableEntityException,
   BadRequestException,
   NotFoundException,
 } from '@nestjs/common';
+import { Repository } from 'typeorm';
+import { InjectRepository } from '@nestjs/typeorm';
 
 @Injectable()
 export class FavouriteService {
   constructor(
+    @InjectRepository(FavouriteEntity)
+    private favouritesRepository: Repository<FavouriteEntity>,
     private readonly albumService: AlbumService,
     private readonly trackService: TrackService,
-    @Inject(forwardRef(() => ArtistService))
     private readonly artistService: ArtistService,
-  ) {}
+  ) {
+    this.init();
+  }
 
-  private static favourites: FavouriteEntity = {
-    artists: [],
-    albums: [],
-    tracks: [],
-  };
+  async init() {
+    const alreadyExist = await this.favouritesRepository.find();
+
+    if (alreadyExist.length) return;
+
+    await this.favouritesRepository.save({});
+  }
 
   async findAll() {
-    const albums = await Promise.all(
-      FavouriteService.favourites.albums.map((id) =>
-        this.albumService.findOne(id),
-      ),
-    );
-    const tracks = await Promise.all(
-      FavouriteService.favourites.tracks.map((id) =>
-        this.trackService.findOne(id),
-      ),
-    );
-    const artists = await Promise.all(
-      FavouriteService.favourites.artists.map((id) =>
-        this.artistService.findOne(id),
-      ),
-    );
+    const [favourite] = await this.favouritesRepository.find({
+      relations: {
+        artists: true,
+        albums: true,
+        tracks: true,
+      },
+    });
 
-    return { artists, albums, tracks };
+    return favourite;
   }
 
   async create({ id, type }: { id: string; type: Entity }) {
-    const currentEntityArray = FavouriteService.favourites[type];
+    const relations = {};
+    relations[type] = true;
+
+    const [favourite] = await this.favouritesRepository.find({ relations });
+
+    const alreadyExist = favourite[type].some(
+      ({ id: entityId }) => entityId === id,
+    );
+
+    if (alreadyExist) throw new BadRequestException(ERRORS.ALREADY_EXIST);
+
     const currentService = `${type.slice(0, -1)}Service`;
 
     try {
-      await this[currentService].findOne(id);
+      await this[currentService].update(id, { favourite });
     } catch (error) {
       if (error.status === 404)
         throw new UnprocessableEntityException(ERRORS.NOT_FOUND);
@@ -61,26 +68,39 @@ export class FavouriteService {
       throw error;
     }
 
-    const alreadyExist = currentEntityArray.some((entityId) => entityId === id);
-
-    if (alreadyExist) throw new BadRequestException(ERRORS.ALREADY_EXIST);
-
-    currentEntityArray.push(id);
-
     return Promise.resolve('Added successfully');
   }
 
   async remove({ id, type }: { id: string; type: Entity }) {
-    const currentEntityArray = FavouriteService.favourites[type];
+    const relations = {};
+    relations[type] = true;
 
-    if (currentEntityArray.every((entityId) => entityId !== id)) {
-      throw new NotFoundException(ERRORS.NOT_FOUND);
-    }
+    const [favourite] = await this.favouritesRepository.find({ relations });
 
-    FavouriteService.favourites[type] = currentEntityArray.filter(
-      (entityId) => entityId !== id,
+    const notExist = !favourite[type].some(
+      ({ id: entityId }) => entityId === id,
     );
 
-    return Promise.resolve();
+    if (notExist) throw new NotFoundException(ERRORS.NOT_FOUND);
+
+    switch (type) {
+      case 'tracks':
+        favourite[type] = favourite.tracks.filter(
+          ({ id: entityId }) => entityId !== id,
+        );
+        break;
+      case 'albums':
+        favourite[type] = favourite.albums.filter(
+          ({ id: entityId }) => entityId !== id,
+        );
+        break;
+      case 'artists':
+        favourite[type] = favourite.artists.filter(
+          ({ id: entityId }) => entityId !== id,
+        );
+        break;
+    }
+
+    await this.favouritesRepository.save(favourite);
   }
 }

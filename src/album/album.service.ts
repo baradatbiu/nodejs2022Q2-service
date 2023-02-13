@@ -1,100 +1,54 @@
-import { ArtistService } from './../artist/artist.service';
-import { FavouriteService } from './../favourite/favourite.service';
-import { TrackService } from './../track/track.service';
 import { ERRORS } from './../types/Error';
-import { v4 } from 'uuid';
 import { AlbumEntity } from './entities/album.entity';
-import {
-  Injectable,
-  NotFoundException,
-  forwardRef,
-  Inject,
-  UnprocessableEntityException,
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class AlbumService {
   constructor(
-    @Inject(forwardRef(() => TrackService))
-    private readonly trackService: TrackService,
-    @Inject(forwardRef(() => ArtistService))
-    private readonly artistService: ArtistService,
-    @Inject(forwardRef(() => FavouriteService))
-    private readonly favouriteService: FavouriteService,
+    @InjectRepository(AlbumEntity)
+    private albumsRepository: Repository<AlbumEntity>,
   ) {}
 
-  private static albums: AlbumEntity[] = [];
-
   async create(createAlbumDto: CreateAlbumDto): Promise<AlbumEntity> {
-    if (createAlbumDto.artistId) {
-      try {
-        await this.artistService.findOne(createAlbumDto.artistId);
-      } catch (error) {
-        if (error.status === 404)
-          throw new UnprocessableEntityException(ERRORS.NOT_FOUND);
-
-        throw error;
-      }
-    }
-
-    const album = new AlbumEntity({
-      id: v4(),
+    const album = this.albumsRepository.create({
       ...createAlbumDto,
     });
 
-    AlbumService.albums.push(album);
-
-    return Promise.resolve(album);
+    return await this.albumsRepository.save(album);
   }
 
-  findAll(): Promise<AlbumEntity[]> {
-    return Promise.resolve(AlbumService.albums);
+  async findAll(): Promise<AlbumEntity[]> {
+    return await this.albumsRepository.find();
   }
 
-  findOne(id: string): Promise<AlbumEntity> {
-    const album = AlbumService.albums.find(({ id: albumId }) => albumId === id);
+  async findOne(id: string): Promise<AlbumEntity> {
+    const album = await this.albumsRepository.findOneBy({ id });
 
     if (!album) throw new NotFoundException(ERRORS.NOT_FOUND);
 
-    return Promise.resolve(album);
+    return album;
   }
 
-  update(id: string, updateAlbumDto: UpdateAlbumDto): Promise<AlbumEntity> {
-    const album = AlbumService.albums.find(({ id: albumId }) => albumId === id);
+  async update(
+    id: string,
+    updateAlbumDto: UpdateAlbumDto,
+  ): Promise<AlbumEntity> {
+    const album = await this.albumsRepository.findOneBy({ id });
 
     if (!album) throw new NotFoundException(ERRORS.NOT_FOUND);
 
     Object.assign(album, updateAlbumDto);
 
-    return Promise.resolve(album);
+    return await this.albumsRepository.save(album);
   }
 
-  async remove(id: string): Promise<AlbumEntity> {
-    const album = AlbumService.albums.find(({ id: albumId }) => albumId === id);
+  async remove(id: string): Promise<void> {
+    const { affected } = await this.albumsRepository.delete(id);
 
-    if (!album) throw new NotFoundException(ERRORS.NOT_FOUND);
-
-    const { albums } = await this.favouriteService.findAll();
-    const hasInFavourites = albums.some(({ id: trackId }) => trackId === id);
-
-    if (hasInFavourites) {
-      await this.favouriteService.remove({ id, type: 'albums' });
-    }
-
-    AlbumService.albums = AlbumService.albums.filter(
-      ({ id: albumId }) => albumId !== id,
-    );
-
-    const tracks = await this.trackService.findAll();
-
-    const foundTrack = tracks.find(({ albumId }) => albumId === id);
-
-    if (foundTrack) {
-      await this.trackService.update(foundTrack.id, { albumId: null });
-    }
-
-    return Promise.resolve(album);
+    if (affected === 0) throw new NotFoundException(ERRORS.NOT_FOUND);
   }
 }

@@ -51,7 +51,7 @@ export class TrackController {
   @HttpCode(204)
   async remove(
     @Param('id', new ParseUUIDPipe({ version: '4' })) id: string,
-  ): Promise<TrackEntity> {
-    return await this.trackService.remove(id);
+  ): Promise<void> {
+    await this.trackService.remove(id);
   }
 }
